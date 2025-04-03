@@ -123,28 +123,33 @@
 </head>
 <body>
   <h1>The Blast Monkeys</h1>
+
   <div class="socials">
     <a href="https://instagram.com/theblastmonkeys" target="_blank">Instagram</a>
     <a href="https://youtube.com/channel/UCph3BU9_Qir9XgST1ckuhXg" target="_blank">YouTube</a>
     <a href="https://www.facebook.com/profile.php?id=100064344936184" target="_blank">Facebook</a>
     <a href="https://tiktok.com/@the_blast_monkeys" target="_blank">TikTok</a>
   </div>
+
   <div class="section">
     <h2>Listen Now</h2>
     <div class="crt">
       <iframe src="https://open.spotify.com/embed/artist/2jN1t3YxArcbP4Ys6LKt34?utm_source=generator" width="300" height="80" frameborder="0" allowtransparency="true"></iframe>
     </div>
   </div>
+
   <div class="section">
     <h2>Upcoming Shows</h2>
     <ul id="event-list">
       <li>Loading events...</li>
     </ul>
   </div>
+
   <div class="section">
     <h2>Also on Bandcamp</h2>
     <iframe style="border: 2px inset #00ff00; width: 350px; height: 470px; background-color: black;" src="https://bandcamp.com/EmbeddedPlayer/album=0000000000/size=large/bgcol=000000/linkcol=00ff00/tracklist=true/artwork=small/transparent=true/" seamless><a href="https://theblastmonkeys.bandcamp.com/music">The Blast Monkeys on Bandcamp</a></iframe>
   </div>
+
   <div class="section">
     <h2>Join the Fan Club</h2>
     <form action="#" method="post">
@@ -152,6 +157,43 @@
       <input type="submit" value="Join">
     </form>
   </div>
+
   <marquee behavior="scroll" direction="left">Welcome to the official website of The Blast Monkeys! Check back often for updates!</marquee>
+  <p class="blinking">[UNDER CONSTRUCTION]</p>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const calendarId = "r07opm4j0us3ms824tqgc05de8@group.calendar.google.com";
+      const apiKey = "AIzaSyAXCfYAROurZMhJynWp6EFPOOlnIbJDD8E";
+      const eventsList = document.getElementById("event-list");
+      const timeMin = new Date().toISOString();
+      const maxResults = 10;
+
+      fetch(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${timeMin}&singleEvents=true&orderBy=startTime&maxResults=${maxResults}`)
+        .then(response => response.json())
+        .then(data => {
+          eventsList.innerHTML = "";
+          if (!data.items || data.items.length === 0) {
+            eventsList.innerHTML = "<li>No upcoming shows found.</li>";
+            return;
+          }
+          data.items.forEach(event => {
+            const li = document.createElement("li");
+            const date = new Date(event.start.dateTime || event.start.date);
+            const time = event.start.dateTime ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "All Day";
+            let location = event.location || "";
+            location = location.replace(/\b\d{5}(-\d{4})?\b/g, '').replace(/,?\s*United States( of America)?/gi, '').trim();
+            if (location.endsWith(',')) location = location.slice(0, -1);
+            const locationText = location ? `<span class="location">@ ${location}</span>` : "";
+            li.innerHTML = `${date.toDateString()}<span class="time">${time}</span> – ${event.summary} ${locationText}`;
+            eventsList.appendChild(li);
+          });
+        })
+        .catch(error => {
+          eventsList.innerHTML = "<li>Could not load events.</li>";
+          console.error("Error fetching events:", error);
+        });
+    });
+  </script>
 </body>
 </html>
