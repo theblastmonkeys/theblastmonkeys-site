@@ -79,6 +79,8 @@
     .socials a:hover {
       text-decoration: underline;
     }
+    ul li span.time { font-style: italic; margin-left: 8px; }
+    ul li span.location { font-weight: bold; margin-left: 8px; }
   </style>
 </head>
 <body>
@@ -92,20 +94,24 @@
   </div>
 
   <div class="section">
-    <h2>Meet the Band</h2>
+    <h2>Upcoming Shows</h2>
+    <ul id="event-list">
+      <li>Loading events...</li>
+    </ul>
+  </div>
 
+  <div class="section">
+    <h2>Meet the Band</h2>
     <div class="bandmate">
       <img src="./IMG_8813.JPG" alt="Kyle on drums">
       <p><strong>Kyle Chambers</strong> – Drums<br>
       The rhythmic engine of The Blast Monkeys. Kyle has been smashing drums for over 12 years, with sticks practically fused to his hands. Raised on the emotional punch of bands like The Front Bottoms and Microwave, he brings that raw 2010s Midwest emo and pop-punk energy to every show. If it’s loud, fast, and full of heart — it’s got Kyle’s pulse behind it.</p>
     </div>
-
     <div class="bandmate">
       <img src="./IMG_7825.jpg" alt="Scott with guitar">
       <p><strong>Scott Vick</strong> – Guitar & Vocals<br>
       Scott is the sound shaper and wildcard voice of the band. A guitarist and vocalist who grew up jamming with Kyle from day one, Scott’s musical influences are a melting pot — from dreamy shoegaze to punk chaos. His versatility gives The Blast Monkeys their signature sonic flavor, and his stage presence flips every switch to 11.</p>
     </div>
-
     <div class="bandmate">
       <img src="./4BEDE80D-ECD9-4953-99E2-29A54C50A2D2.JPEG" alt="Grant on bass">
       <p><strong>Grant Schuck</strong> – Bass<br>
@@ -176,10 +182,8 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       monkeyX += (targetMonkeyX - monkeyX) * 0.2;
-
       ctx.fillStyle = "#00ff00";
       ctx.fillRect(monkeyX, 210, 40, 20);
-
       if (banana.complete && banana.naturalWidth !== 0) {
         ctx.drawImage(banana, bananaX, bananaY, 24, 24);
       } else {
@@ -188,12 +192,9 @@
         ctx.arc(bananaX + 10, bananaY + 10, 10, 0, Math.PI * 2);
         ctx.fill();
       }
-
       ctx.fillStyle = "#00ff00";
       ctx.fillText("Score: " + score, 10, 20);
-
       bananaY += 4;
-
       if (bananaY > 210 && bananaX > monkeyX - 20 && bananaX < monkeyX + 40) {
         score++;
         bananaY = -20;
@@ -202,10 +203,39 @@
         bananaY = -20;
         bananaX = Math.floor(Math.random() * 300);
       }
-
       requestAnimationFrame(draw);
     }
     draw();
+
+    // Upcoming Shows calendar fetch
+    document.addEventListener("DOMContentLoaded", function () {
+      const calendarId = "r07opm4j0us3ms824tqgc05de8@group.calendar.google.com";
+      const apiKey = "AIzaSyAXCfYAROurZMhJynWp6EFPOOlnIbJDD8E";
+      const eventsList = document.getElementById("event-list");
+      const timeMin = new Date().toISOString();
+      const maxResults = 5;
+
+      fetch(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${timeMin}&singleEvents=true&orderBy=startTime&maxResults=${maxResults}`)
+        .then(response => response.json())
+        .then(data => {
+          eventsList.innerHTML = "";
+          data.items.forEach(event => {
+            const li = document.createElement("li");
+            const date = new Date(event.start.dateTime || event.start.date);
+            const time = event.start.dateTime ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "All Day";
+            let location = event.location || "";
+            location = location.replace(/\b\d{5}(-\d{4})?\b/g, '').replace(/,?\s*United States( of America)?/gi, '').trim();
+            if (location.endsWith(',')) location = location.slice(0, -1);
+            const locationText = location ? `<span class="location">@ ${location}</span>` : "";
+            li.innerHTML = `${date.toDateString()}<span class="time"> ${time}</span> – ${event.summary} ${locationText}`;
+            eventsList.appendChild(li);
+          });
+        })
+        .catch(error => {
+          eventsList.innerHTML = "<li>Could not load events.</li>";
+          console.error("Error fetching events:", error);
+        });
+    });
   </script>
 </body>
 </html>
