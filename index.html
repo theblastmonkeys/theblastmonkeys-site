@@ -42,31 +42,21 @@
       width: 85%;
       background-color: #000000;
     }
-    .crt {
-      border: 4px ridge #00ff00;
-      background-color: #001100;
-      box-shadow: 0 0 20px #00ff00;
-      padding: 20px;
-      display: inline-block;
-      margin-top: 10px;
-      position: relative;
-      overflow: hidden;
+    .bandmate {
+      margin: 20px auto;
+      max-width: 400px;
+      background: #001100;
+      padding: 10px;
+      border: 1px solid #00ff00;
     }
-    .crt::before, .crt::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
+    .bandmate img {
       width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 2;
+      border: 1px solid #00ff00;
     }
-    .crt::before {
-      background-image: repeating-linear-gradient(to bottom, rgba(0, 255, 0, 0.05), rgba(0, 255, 0, 0.05) 1px, transparent 1px, transparent 2px);
-    }
-    .crt::after {
-      background: radial-gradient(circle, rgba(0,255,0,0.1) 0%, rgba(0,0,0,0.2) 70%);
+    .bandmate p {
+      text-align: left;
+      font-size: 14px;
+      margin-top: 10px;
     }
     canvas {
       background-color: #000;
@@ -99,6 +89,28 @@
     <a href="https://youtube.com/channel/UCph3BU9_Qir9XgST1ckuhXg" target="_blank">YouTube</a>
     <a href="https://www.facebook.com/profile.php?id=100064344936184" target="_blank">Facebook</a>
     <a href="https://tiktok.com/@the_blast_monkeys" target="_blank">TikTok</a>
+  </div>
+
+  <div class="section">
+    <h2>Meet the Band</h2>
+
+    <div class="bandmate">
+      <img src="./IMG_8813.JPG" alt="Kyle on drums">
+      <p><strong>Kyle Chambers</strong> – Drums<br>
+      The rhythmic engine of The Blast Monkeys. Kyle has been smashing drums for over 12 years, with sticks practically fused to his hands. Raised on the emotional punch of bands like The Front Bottoms and Microwave, he brings that raw 2010s Midwest emo and pop-punk energy to every show. If it’s loud, fast, and full of heart — it’s got Kyle’s pulse behind it.</p>
+    </div>
+
+    <div class="bandmate">
+      <img src="./IMG_7825.jpg" alt="Scott with guitar">
+      <p><strong>Scott Vick</strong> – Guitar & Vocals<br>
+      Scott is the sound shaper and wildcard voice of the band. A guitarist and vocalist who grew up jamming with Kyle from day one, Scott’s musical influences are a melting pot — from dreamy shoegaze to punk chaos. His versatility gives The Blast Monkeys their signature sonic flavor, and his stage presence flips every switch to 11.</p>
+    </div>
+
+    <div class="bandmate">
+      <img src="./4BEDE80D-ECD9-4953-99E2-29A54C50A2D2.JPEG" alt="Grant on bass">
+      <p><strong>Grant Schuck</strong> – Bass<br>
+      The low-end lifter and riff wizard. Grant joined the band in 2024 but has been a longtime comrade of Kyle and Scott. A metalhead at heart with a soft spot for classic rock, he brings thunder and groove in equal measure. Whether it’s a breakdown or a bassline to make your chest rattle, Grant’s got it locked in.</p>
+    </div>
   </div>
 
   <div class="section">
