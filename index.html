@@ -52,59 +52,29 @@
       position: relative;
       overflow: hidden;
     }
-    .crt::before {
+    .crt::before, .crt::after {
       content: "";
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: repeating-linear-gradient(to bottom, rgba(0, 255, 0, 0.05), rgba(0, 255, 0, 0.05) 1px, transparent 1px, transparent 2px);
       pointer-events: none;
       z-index: 2;
     }
+    .crt::before {
+      background-image: repeating-linear-gradient(to bottom, rgba(0, 255, 0, 0.05), rgba(0, 255, 0, 0.05) 1px, transparent 1px, transparent 2px);
+    }
     .crt::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
       background: radial-gradient(circle, rgba(0,255,0,0.1) 0%, rgba(0,0,0,0.2) 70%);
-      pointer-events: none;
-      z-index: 1;
     }
-    .crt iframe {
-      position: relative;
-      z-index: 3;
-    }
-    .blinking {
-      color: #00ff00;
-      animation: blink 1s step-start infinite;
-    }
-    @keyframes blink {
-      50% { opacity: 0; }
-    }
-    ul {
-      text-align: left;
-      margin-left: 10%;
-      font-size: 16px;
-    }
-    ul li span.time { font-style: italic; margin-left: 8px; }
-    ul li span.location { font-weight: bold; margin-left: 8px; }
-    input[type="email"], input[type="submit"] {
-      margin: 5px;
-      padding: 5px;
-      background-color: black;
-      color: #00ff00;
-      border: 1px solid #00ff00;
-      font-family: "Courier New", monospace;
-      cursor: pointer;
-    }
-    marquee {
-      font-size: 14px;
-      color: #00ff00;
-      margin-top: 10px;
+    canvas {
+      background-color: #000;
+      display: block;
+      margin: 0 auto;
+      image-rendering: pixelated;
+      border: 2px solid #00ff00;
+      touch-action: none;
     }
     iframe { border: none; }
     .socials {
@@ -139,15 +109,17 @@
   </div>
 
   <div class="section">
-    <h2>Upcoming Shows</h2>
-    <ul id="event-list">
-      <li>Loading events...</li>
-    </ul>
+    <h2>Banana Catcher</h2>
+    <canvas id="gameCanvas" width="320" height="240"></canvas>
   </div>
 
   <div class="section">
     <h2>Also on Bandcamp</h2>
-    <iframe style="border: 2px inset #00ff00; width: 350px; height: 753px; background-color: black;" src="https://bandcamp.com/EmbeddedPlayer/album=536744498/size=large/bgcol=333333/linkcol=2ebd35/transparent=true/" seamless><a href="https://theblastmonkeys.bandcamp.com/album/monkey-business">Monkey Business by The Blast Monkeys</a></iframe>
+    <iframe style="border: 2px inset #00ff00; width: 350px; height: 753px; background-color: black;" 
+    src="https://bandcamp.com/EmbeddedPlayer/album=536744498/size=large/bgcol=000000/linkcol=00ff00/tracklist=true/artwork=small/transparent=true/" 
+    seamless>
+    <a href="https://theblastmonkeys.bandcamp.com/album/monkey-business">Monkey Business by The Blast Monkeys</a>
+    </iframe>
   </div>
 
   <div class="section">
@@ -163,38 +135,69 @@
   <p class="blinking">[UNDER CONSTRUCTION]</p>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const calendarId = "r07opm4j0us3ms824tqgc05de8@group.calendar.google.com";
-      const apiKey = "AIzaSyAXCfYAROurZMhJynWp6EFPOOlnIbJDD8E";
-      const eventsList = document.getElementById("event-list");
-      const timeMin = new Date().toISOString();
-      const maxResults = 10;
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const banana = new Image();
+    banana.src = "./image.png";
 
-      fetch(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&timeMin=${timeMin}&singleEvents=true&orderBy=startTime&maxResults=${maxResults}`)
-        .then(response => response.json())
-        .then(data => {
-          eventsList.innerHTML = "";
-          if (!data.items || data.items.length === 0) {
-            eventsList.innerHTML = "<li>No upcoming shows found.</li>";
-            return;
-          }
-          data.items.forEach(event => {
-            const li = document.createElement("li");
-            const date = new Date(event.start.dateTime || event.start.date);
-            const time = event.start.dateTime ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "All Day";
-            let location = event.location || "";
-            location = location.replace(/\b\d{5}(-\d{4})?\b/g, '').replace(/,?\s*United States( of America)?/gi, '').trim();
-            if (location.endsWith(',')) location = location.slice(0, -1);
-            const locationText = location ? `<span class="location">@ ${location}</span>` : "";
-            li.innerHTML = `${date.toDateString()}<span class="time">${time}</span> – ${event.summary} ${locationText}`;
-            eventsList.appendChild(li);
-          });
-        })
-        .catch(error => {
-          eventsList.innerHTML = "<li>Could not load events.</li>";
-          console.error("Error fetching events:", error);
-        });
+    let monkeyX = 140;
+    let bananaY = -20;
+    let bananaX = Math.floor(Math.random() * 300);
+    let score = 0;
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" && monkeyX > 0) monkeyX -= 10;
+      if (e.key === "ArrowRight" && monkeyX < 280) monkeyX += 10;
     });
+
+    let touchStartX = null;
+    canvas.addEventListener("touchstart", e => {
+      touchStartX = e.touches[0].clientX;
+    });
+    canvas.addEventListener("touchend", e => {
+      if (!touchStartX) return;
+      let touchEndX = e.changedTouches[0].clientX;
+      let diff = touchEndX - touchStartX;
+      if (diff > 30) monkeyX = Math.min(280, monkeyX + 20);
+      if (diff < -30) monkeyX = Math.max(0, monkeyX - 20);
+      touchStartX = null;
+    });
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#00ff00";
+      ctx.fillRect(monkeyX, 210, 40, 20);
+
+      if (banana.complete && banana.naturalWidth !== 0) {
+        ctx.drawImage(banana, bananaX, bananaY, 24, 24);
+      } else {
+        ctx.fillStyle = "#ffff00";
+        ctx.beginPath();
+        ctx.arc(bananaX + 10, bananaY + 10, 10, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = "#00ff00";
+      ctx.fillText("Score: " + score, 10, 20);
+
+      bananaY += 4;
+
+      if (bananaY > 210 && bananaX > monkeyX - 20 && bananaX < monkeyX + 40) {
+        score++;
+        bananaY = -20;
+        bananaX = Math.floor(Math.random() * 300);
+      } else if (bananaY > 240) {
+        bananaY = -20;
+        bananaX = Math.floor(Math.random() * 300);
+      }
+
+      requestAnimationFrame(draw);
+    }
+    draw();
   </script>
+</body>
+</html>
+
 </body>
 </html>
