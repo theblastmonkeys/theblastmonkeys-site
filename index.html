@@ -111,6 +111,7 @@
   <div class="section">
     <h2>Banana Catcher</h2>
     <canvas id="gameCanvas" width="320" height="240"></canvas>
+    <p>Use ← and → arrow keys on desktop, or swipe left/right on mobile to move the monkey and catch falling bananas!</p>
   </div>
 
   <div class="section">
@@ -144,10 +145,11 @@
     let bananaY = -20;
     let bananaX = Math.floor(Math.random() * 300);
     let score = 0;
+    let targetMonkeyX = monkeyX;
 
     document.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowLeft" && monkeyX > 0) monkeyX -= 10;
-      if (e.key === "ArrowRight" && monkeyX < 280) monkeyX += 10;
+      if (e.key === "ArrowLeft") targetMonkeyX = Math.max(0, targetMonkeyX - 40);
+      if (e.key === "ArrowRight") targetMonkeyX = Math.min(280, targetMonkeyX + 40);
     });
 
     let touchStartX = null;
@@ -158,13 +160,16 @@
       if (!touchStartX) return;
       let touchEndX = e.changedTouches[0].clientX;
       let diff = touchEndX - touchStartX;
-      if (diff > 30) monkeyX = Math.min(280, monkeyX + 20);
-      if (diff < -30) monkeyX = Math.max(0, monkeyX - 20);
+      if (diff > 30) targetMonkeyX = Math.min(280, targetMonkeyX + 40);
+      if (diff < -30) targetMonkeyX = Math.max(0, targetMonkeyX - 40);
       touchStartX = null;
     });
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Smooth monkey movement
+      monkeyX += (targetMonkeyX - monkeyX) * 0.2;
 
       ctx.fillStyle = "#00ff00";
       ctx.fillRect(monkeyX, 210, 40, 20);
